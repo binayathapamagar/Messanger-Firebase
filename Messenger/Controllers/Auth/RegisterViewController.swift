@@ -21,6 +21,9 @@ class RegisterViewController: UIViewController {
         imageView.image = UIImage(systemName: "person.crop.circle.fill")
         imageView.contentMode = .scaleAspectFit
         imageView.tintColor = .black
+        imageView.layer.masksToBounds = true //Important to make it circular by clipping the overflowing image.
+        imageView.layer.borderWidth = 1
+        imageView.layer.borderColor = UIColor.lightGray.cgColor
         return imageView
     }()
     
@@ -114,8 +117,9 @@ class RegisterViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollView.frame = view.bounds
-        let size = scrollView.width / 5
+        let size = scrollView.width / 4
         profilePicImageView.frame = CGRect(x: (scrollView.width - size) / 2, y: 20, width: size, height: size)
+        profilePicImageView.layer.cornerRadius = profilePicImageView.width / 2 
         firstNameTextField.frame = CGRect(x: 30, y: profilePicImageView.bottom + 25, width: scrollView.width - 60, height: 52)
         lastNameTextField.frame = CGRect(x: 30, y: firstNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
         emailTextField.frame = CGRect(x: 30, y: lastNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
@@ -148,7 +152,35 @@ class RegisterViewController: UIViewController {
     }
     
     @objc private func didTapProfilePic() {
-        print("Change profile pic tapped!")
+        presentPhotoSelectionOptionsActionSheet()
+    }
+    
+    func presentPhotoSelectionOptionsActionSheet() {
+        let photoSelectionOptionActionSheetController = UIAlertController(title: "Upload profile picture", message: "Choose the preferred method to upload a profile picture.", preferredStyle: .actionSheet)
+        photoSelectionOptionActionSheetController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        photoSelectionOptionActionSheetController.addAction(UIAlertAction(title: "Take a photo ", style: .default, handler: { [weak self] _ in
+            self?.presentCamera()
+        }))
+        photoSelectionOptionActionSheetController.addAction(UIAlertAction(title: "Choose a photo", style: .default, handler: { [weak self] _ in
+            self?.presentPhotosLibrary()
+        }))
+        present(photoSelectionOptionActionSheetController, animated: true, completion: nil)
+    }
+    
+    private func presentCamera() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .camera
+        imagePickerController.allowsEditing = true
+        present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    private func presentPhotosLibrary() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .photoLibrary
+        imagePickerController.allowsEditing = true
+        present(imagePickerController, animated: true, completion: nil)
     }
     
     private func setupNavBar() {
@@ -184,6 +216,22 @@ extension RegisterViewController: UITextFieldDelegate {
             registerButtonTapped()
         }
          return true
+    }
+    
+}
+
+// MARK: - UIImagePickerControllerDelegate extension
+extension RegisterViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        if let selectedCroppedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
+            profilePicImageView.image = selectedCroppedImage
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
     }
     
 }
