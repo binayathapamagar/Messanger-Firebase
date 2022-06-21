@@ -9,10 +9,15 @@ import UIKit
 
 class PhotoViewerViewController: UIViewController {
 
+    // MARK: - Properties
+    
+    // MARK: - @IBOutlets
+    
+    // MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
+
+    // MARK: - Methods
 
 }
