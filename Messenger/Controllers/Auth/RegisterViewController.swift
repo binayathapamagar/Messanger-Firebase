@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import FirebaseDatabase
 
 class RegisterViewController: UIViewController {
 
@@ -39,7 +40,7 @@ class RegisterViewController: UIViewController {
         textField.placeholder = "First Name"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -54,7 +55,7 @@ class RegisterViewController: UIViewController {
         textField.placeholder = "Last Name"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -69,7 +70,7 @@ class RegisterViewController: UIViewController {
         textField.placeholder = "Email"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -85,7 +86,7 @@ class RegisterViewController: UIViewController {
         textField.placeholder = "Password"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -105,8 +106,6 @@ class RegisterViewController: UIViewController {
     // MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        title = "Register"
         setup()
     }
     
@@ -117,26 +116,24 @@ class RegisterViewController: UIViewController {
             
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        scrollView.frame = view.bounds
-        let size = scrollView.width / 4
-        profilePicImageView.frame = CGRect(x: (scrollView.width - size) / 2, y: 20, width: size, height: size)
-        profilePicImageView.layer.cornerRadius = profilePicImageView.width / 2 
-        firstNameTextField.frame = CGRect(x: 30, y: profilePicImageView.bottom + 25, width: scrollView.width - 60, height: 52)
-        lastNameTextField.frame = CGRect(x: 30, y: firstNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
-        emailTextField.frame = CGRect(x: 30, y: lastNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
-        passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
-        registerButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
+        setupSubviewsLayout()
     }
 
     // MARK: - Methods
     private func setup() {
-        //Textfield delegates
-        firstNameTextField.delegate = self
-        lastNameTextField.delegate = self
-        emailTextField.delegate = self
-        passwordTextField.delegate = self
-        registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
-        //Add subviews
+        setupView()
+        setupSubviews()
+        setupTextFields()
+        setupProfilePicImageView()
+        setupRegisterButton()
+    }
+    
+    private func setupView() {
+        view.backgroundColor = .white
+        title = "Register"
+    }
+    
+    private func setupSubviews() {
         view.addSubview(scrollView)
         scrollView.addSubview(profilePicImageView)
         scrollView.addSubview(firstNameTextField)
@@ -144,7 +141,28 @@ class RegisterViewController: UIViewController {
         scrollView.addSubview(emailTextField)
         scrollView.addSubview(passwordTextField)
         scrollView.addSubview(registerButton)
-        //ProfilePic tap gesture
+    }
+    
+    private func setupSubviewsLayout() {
+        scrollView.frame = view.bounds
+        let size = scrollView.width / 4
+        profilePicImageView.frame = CGRect(x: (scrollView.width - size) / 2, y: 20, width: size, height: size)
+        profilePicImageView.layer.cornerRadius = profilePicImageView.width / 2
+        firstNameTextField.frame = CGRect(x: 30, y: profilePicImageView.bottom + 25, width: scrollView.width - 60, height: 52)
+        lastNameTextField.frame = CGRect(x: 30, y: firstNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
+        emailTextField.frame = CGRect(x: 30, y: lastNameTextField.bottom + 15, width: scrollView.width - 60, height: 52)
+        passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
+        registerButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
+    }
+    
+    private func setupTextFields() {
+        firstNameTextField.delegate = self
+        lastNameTextField.delegate = self
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+    }
+    
+    private func setupProfilePicImageView() {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(didTapProfilePic))
         gesture.numberOfTapsRequired = 1
         gesture.numberOfTouchesRequired = 1
@@ -154,6 +172,42 @@ class RegisterViewController: UIViewController {
     
     @objc private func didTapProfilePic() {
         presentPhotoSelectionOptionsActionSheet()
+    }
+    
+    private func setupRegisterButton() {
+        registerButton.addTarget(self, action: #selector(registerButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc private func registerButtonTapped() {
+        firstNameTextField.resignFirstResponder()
+        lastNameTextField.resignFirstResponder()
+        emailTextField.resignFirstResponder()
+        passwordTextField.resignFirstResponder()
+        guard let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = emailTextField.text, let password = passwordTextField.text, !firstName.isEmpty, !lastName.isEmpty, !email.isEmpty, !password.isEmpty, email.isValidEmail, password.count >= 6 else {
+             showErrorAlert(with: "Error", and: "Please fill the textfields with valid information to register .")
+            return
+        }
+        // Firebase registration
+        print("Firebase Registration!")
+        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self]  authDataResult, error in
+            guard let strongSelf = self else {
+                print("Self is nil!")
+                return
+            }
+            guard let authDataResult = authDataResult, error == nil else {
+                self?.showErrorAlert(with: "Registration Error", and: "Error registering the user.")
+                return
+            }
+            print("Registration success with the new user: \(authDataResult.user)")
+            DatabaseManager.shared.isEmailUnique(with: email) { [weak self] emailIsUnique in
+                if emailIsUnique {
+                    
+                }
+            }
+            let newUser = ChatAppUser(firstName: firstName, lastName: lastName, email: email)
+            DatabaseManager.shared.createUser(with: newUser)
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil) //Firebase automatically logs the user in upon a successful registration.
+        }
     }
     
     func presentPhotoSelectionOptionsActionSheet() {
@@ -186,26 +240,6 @@ class RegisterViewController: UIViewController {
     
     private func setupNavBar() {
         navigationController?.navigationBar.tintColor = .black
-    }
-    
-    @objc private func registerButtonTapped() {
-        firstNameTextField.resignFirstResponder()
-        lastNameTextField.resignFirstResponder()
-        emailTextField.resignFirstResponder()
-        passwordTextField.resignFirstResponder()
-        guard let firstName = firstNameTextField.text, let lastName = lastNameTextField.text, let email = emailTextField.text, let password = passwordTextField.text, !firstName.isEmpty, !lastName.isEmpty, !email.isEmpty, !password.isEmpty, email.isValidEmail, password.count >= 6 else {
-             showErrorAlert(with: "Error", and: "Please fill the textfields with valid information to register .")
-            return
-        }
-        // Firebase registration
-        print("Firebase Registration!")
-        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self]  authDataResult, error in
-            guard let authDataResult = authDataResult, error == nil else {
-                self?.showErrorAlert(with: "Registration Error", and: "Error registering the user.")
-                return
-            }
-            print("Registration success with the new user: \(authDataResult.user)")
-        }
     }
     
 }

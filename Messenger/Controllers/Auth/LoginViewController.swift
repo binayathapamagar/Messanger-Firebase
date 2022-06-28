@@ -35,7 +35,7 @@ class LoginViewController: UIViewController {
         textField.placeholder = "Email"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -51,7 +51,7 @@ class LoginViewController: UIViewController {
         textField.placeholder = "Password"
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .white
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
@@ -71,8 +71,6 @@ class LoginViewController: UIViewController {
     // MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        title = "Login"
         setup()
     }
     
@@ -83,20 +81,28 @@ class LoginViewController: UIViewController {
             
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        scrollView.frame = view.bounds
-        let size = scrollView.width / 5
-        logoImageView.frame = CGRect(x: (scrollView.width - size) / 2, y: 20, width: size, height: size)
-        emailTextField.frame = CGRect(x: 30, y: logoImageView.bottom + 25, width: scrollView.width - 60, height: 52)
-        passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
-        loginButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
+        setupSubviewsLayout()
     }
 
     // MARK: - Methods
     private func setup() {
-        emailTextField.delegate = self
-        passwordTextField.delegate = self
-        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-        //Add subviews
+        setupView()
+        setupSubviews()
+        setupTextFields()
+        setupLoginButton()
+    }
+    
+    private func setupNavBar() {
+        navigationController?.navigationBar.tintColor = .black
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register", style: .done, target: self, action: #selector(registerBarButtonTapped))
+    }
+    
+    private func setupView() {
+        view.backgroundColor = .white
+        title = "Login"
+    }
+    
+    private func setupSubviews() {
         view.addSubview(scrollView)
         scrollView.addSubview(logoImageView)
         scrollView.addSubview(emailTextField)
@@ -104,9 +110,22 @@ class LoginViewController: UIViewController {
         scrollView.addSubview(loginButton)
     }
     
-    private func setupNavBar() {
-        navigationController?.navigationBar.tintColor = .black
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register", style: .done, target: self, action: #selector(registerBarButtonTapped))
+    private func setupSubviewsLayout() {
+        scrollView.frame = view.bounds
+        let size = scrollView.width / 5
+        logoImageView.frame = CGRect(x: (scrollView.width - size) / 2, y: 20, width: size, height: size)
+        emailTextField.frame = CGRect(x: 30, y: logoImageView.bottom + 25, width: scrollView.width - 60, height: 52)
+        passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
+        loginButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
+    }
+    
+    private func setupTextFields() {
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+    }
+    
+    private func setupLoginButton() {
+        loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
     }
     
     @objc private func registerBarButtonTapped() {
@@ -123,11 +142,16 @@ class LoginViewController: UIViewController {
         // Firebase login
         print("Firebase login!")
         FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) { [weak self] authDataResult, error in
+            guard let strongSelf = self else {
+                print("Self is nil!")
+                return
+            }  
             guard let authDataResult = authDataResult, error == nil else {
                 self?.showErrorAlert(with: "Login Error", and: "Error logging the user in.")
                 return
             }
             print("Login success with the new user: \(authDataResult.user)")
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
         }
     }
     
