@@ -22,7 +22,7 @@ class RegisterViewController: UIViewController {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "person.crop.circle.fill")
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .black
+        imageView.tintColor = UIColor(red: 0.27, green: 0.37, blue: 0.61, alpha: 1.00)
         imageView.layer.masksToBounds = true //Important to make it circular by clipping the overflowing image.
         imageView.layer.borderWidth = 1
         imageView.layer.borderColor = UIColor.lightGray.cgColor
@@ -37,10 +37,13 @@ class RegisterViewController: UIViewController {
         textField.layer.cornerRadius = 12
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.placeholder = "First Name"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "First Name",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray]
+        )
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .lightGray
+        textField.backgroundColor = UIColor(red: 0.94, green: 0.94, blue: 0.96, alpha: 1.00)
         return textField
     }()
     
@@ -52,10 +55,13 @@ class RegisterViewController: UIViewController {
         textField.layer.cornerRadius = 12
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.placeholder = "Last Name"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Last Name",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray]
+        )
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .lightGray
+        textField.backgroundColor = UIColor(red: 0.94, green: 0.94, blue: 0.96, alpha: 1.00)
         return textField
     }()
     
@@ -67,10 +73,13 @@ class RegisterViewController: UIViewController {
         textField.layer.cornerRadius = 12
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.placeholder = "Email"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Email",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray]
+        )
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .lightGray
+        textField.backgroundColor = UIColor(red: 0.94, green: 0.94, blue: 0.96, alpha: 1.00)
         return textField
     }()
     
@@ -83,10 +92,13 @@ class RegisterViewController: UIViewController {
         textField.layer.cornerRadius = 12
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.lightGray.cgColor
-        textField.placeholder = "Password"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: "Password",
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.systemGray]
+        )
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 15, height: 0))
         textField.leftViewMode = .always
-        textField.backgroundColor = .lightGray
+        textField.backgroundColor = UIColor(red: 0.94, green: 0.94, blue: 0.96, alpha: 1.00)
         return textField
     }()
     
@@ -94,7 +106,7 @@ class RegisterViewController: UIViewController {
         let button = UIButton()
         button.setTitle("Register", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .black
+        button.backgroundColor = UIColor(red: 0.27, green: 0.37, blue: 0.61, alpha: 1.00)
         button.layer.cornerRadius = 12
         button.layer.masksToBounds = true
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
@@ -239,7 +251,10 @@ class RegisterViewController: UIViewController {
     }
     
     private func setupNavBar() {
-        navigationController?.navigationBar.tintColor = .black
+        navigationController?.navigationBar.titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.systemBlue
+        ]
+        navigationController?.navigationBar.tintColor = .systemBlue
     }
     
 }
