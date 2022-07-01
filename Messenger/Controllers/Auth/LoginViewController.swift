@@ -142,8 +142,7 @@ class LoginViewController: UIViewController {
     }
     
     @objc private func loginButtonTapped() {
-        emailTextField.resignFirstResponder()
-        passwordTextField.resignFirstResponder()
+        resignTextFieldFirstResponder()
         guard let email = emailTextField.text, let password = passwordTextField.text, !email.isEmpty, !password.isEmpty, email.isValidEmail, password.count >= 6 else {
              showErrorAlert(with: "Error", and: "Please fill the textfields with valid information to login.")
             return
@@ -162,6 +161,11 @@ class LoginViewController: UIViewController {
             print("Login success with the new user: \(authDataResult.user)")
             strongSelf.navigationController?.dismiss(animated: true, completion: nil)
         }
+    }
+    
+    private func resignTextFieldFirstResponder() {
+        emailTextField.resignFirstResponder()
+        passwordTextField.resignFirstResponder()
     }
     
 }
