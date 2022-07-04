@@ -53,7 +53,7 @@ extension ProfileViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        alertWithOKActionCancel(message: "Are you sure you want to log out?", title: "Log Out", style: .alert, okTitle: "Yes", cancelTitle: "No") { [weak self] in
+        alertWithOKActionCancel(message: "Are you sure you want to log out?", title: "Log Out", style: .actionSheet, okTitle: "Yes", cancelTitle: "No") { [weak self] in
             do {
                 try FirebaseAuth.Auth.auth().signOut()
                 // Send to login page.
