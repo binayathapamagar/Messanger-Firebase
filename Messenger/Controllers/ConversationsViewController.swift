@@ -17,7 +17,6 @@ class ConversationsViewController: UIViewController {
     // MARK: - Lifecycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
         setup()
     }
     

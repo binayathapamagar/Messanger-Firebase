@@ -129,8 +129,10 @@ class LoginViewController: UIViewController {
     }
     
     private func setupTextFields() {
-        emailTextField.delegate = self
-        passwordTextField.delegate = self
+        [emailTextField, passwordTextField].forEach { textField in
+            textField.delegate = self
+            textField.textColor = .systemBackground
+        }
     }
     
     private func setupLoginButton() {

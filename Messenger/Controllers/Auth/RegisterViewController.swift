@@ -175,10 +175,10 @@ class RegisterViewController: UIViewController {
     }
     
     private func setupTextFields() {
-        firstNameTextField.delegate = self
-        lastNameTextField.delegate = self
-        emailTextField.delegate = self
-        passwordTextField.delegate = self
+        [firstNameTextField, lastNameTextField, emailTextField, passwordTextField].forEach { textField in
+            textField.delegate = self
+            textField.textColor = .systemBackground
+        }
     }
     
     private func setupProfilePicImageView() {

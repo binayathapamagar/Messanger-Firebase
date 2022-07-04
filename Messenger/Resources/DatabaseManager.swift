@@ -37,7 +37,7 @@ extension DatabaseManager {
                 completion(false)
                 return
             }
-            completion(true)
+            completion(true) //Returning true since the email already exists.
         }
     }
     
