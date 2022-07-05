@@ -22,8 +22,8 @@ extension UIViewController {
     
     func alertWithOKActionCancel(message: String?, title: String? = "Alert",  style: UIAlertController.Style? = .alert, okTitle: String? = nil ,cancelTitle: String? = nil,okAction: (()->())? = nil) {
         let alertController = getAlert(message: message, title: title, style: style)
-        alertController.addAction(title: okTitle?.localizedLowercase, style: .destructive, handler: okAction)
-        alertController.addAction(title: cancelTitle?.localizedLowercase, style: .cancel, handler: nil)
+        alertController.addAction(title: okTitle, style: .destructive, handler: okAction)
+        alertController.addAction(title: cancelTitle, style: .cancel, handler: nil)
         self.present(alertController, animated: true, completion: nil)
     }
     

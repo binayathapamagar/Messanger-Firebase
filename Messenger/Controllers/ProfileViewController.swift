@@ -53,16 +53,19 @@ extension ProfileViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        alertWithOKActionCancel(message: "Are you sure you want to log out?", title: "Log Out", style: .actionSheet, okTitle: "Yes", cancelTitle: "No") { [weak self] in
+        alertWithOKActionCancel(message: "Are you sure you want to log out?", title: "Log Out", style: .actionSheet, okTitle: "Logout", cancelTitle: "Cancel") { [weak self] in
+            guard let strongSelf = self else {
+                return
+            }
             do {
-                try FirebaseAuth.Auth.auth().signOut()
                 // Send to login page.
+                try FirebaseAuth.Auth.auth().signOut()
                 let loginViewController = LoginViewController()
                 let navigationController = UINavigationController(rootViewController: loginViewController)
                 navigationController.modalPresentationStyle = .fullScreen
-                self?.present(navigationController, animated: true)
+                strongSelf.present(navigationController, animated: true)
             } catch {
-                self?.showErrorAlert(with: "Firebase Error!", and: "Error signing out the user.")
+                strongSelf.showErrorAlert(with: "Firebase Error!", and: "Error signing out the user.")
             }
         }
     }

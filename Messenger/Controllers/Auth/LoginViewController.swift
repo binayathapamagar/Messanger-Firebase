@@ -7,6 +7,8 @@
 
 import UIKit
 import FirebaseAuth
+//import FacebookLogin - This is what they tell us to import in the documentation(Not updated) but it is wrong as we have to import FBSDKLoginKit for xcworkspace projects.
+import FBSDKLoginKit
 
 class LoginViewController: UIViewController {
 
@@ -72,6 +74,13 @@ class LoginViewController: UIViewController {
         return button
     }()
     
+    private let facebookLoginButton: FBLoginButton = {
+        let facebookLoginButton = FBLoginButton()
+        //Setting up scopes/permissions to request to Facebook to get the user's email and profile details that has the first and last name.
+        facebookLoginButton.permissions = ["email", "public_profile"]
+        return facebookLoginButton
+    }()
+    
     // MARK: - @IBOutlets
     
     // MARK: - Lifecycle methods
@@ -96,6 +105,7 @@ class LoginViewController: UIViewController {
         setupSubviews()
         setupTextFields()
         setupLoginButton()
+        setupFacebookLoginButton()
     }
     
     private func setupNavBar() {
@@ -117,6 +127,7 @@ class LoginViewController: UIViewController {
         scrollView.addSubview(emailTextField)
         scrollView.addSubview(passwordTextField)
         scrollView.addSubview(loginButton)
+        scrollView.addSubview(facebookLoginButton)
     }
     
     private func setupSubviewsLayout() {
@@ -126,6 +137,7 @@ class LoginViewController: UIViewController {
         emailTextField.frame = CGRect(x: 30, y: logoImageView.bottom + 25, width: scrollView.width - 60, height: 52)
         passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
         loginButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
+        facebookLoginButton.frame = CGRect(x: 30, y: loginButton.bottom + 20, width: scrollView.width - 60, height: 50)
     }
     
     private func setupTextFields() {
@@ -137,6 +149,10 @@ class LoginViewController: UIViewController {
     
     private func setupLoginButton() {
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+    }
+    
+    private func setupFacebookLoginButton() {
+        facebookLoginButton.delegate = self
     }
     
     @objc private func registerBarButtonTapped() {
@@ -183,5 +199,35 @@ extension LoginViewController: UITextFieldDelegate {
         }
          return true
     }
+    
+}
+
+
+// MARK: - LoginButtonDelegate extension (Facebook)
+extension LoginViewController: LoginButtonDelegate {
+    
+    func loginButton(_ loginButton: FBLoginButton, didCompleteWith result: LoginManagerLoginResult?, error: Error?) {
+        guard let accessToken = result?.token?.tokenString else {
+            showErrorAlert(with: "Facebook login error!", and: "Access token is nil.")
+            return
+        }
+        //We need to trade this facebook login access token with Firebase to get a Firebase auth credential. Then, we need to use this auth credential to sign the user in Firebase. Note: We also have to handle the Multi-Factor authentication (MFA) as the fb user can have the MFA setup for their account. For example: Code texts, email, call, etc. If this is not handled, Firebase will not be able to log the user in via the auth credential as there is a second layer of security.
+        let authCredential = FacebookAuthProvider.credential(withAccessToken: accessToken)
+        FirebaseAuth.Auth.auth().signIn(with: authCredential) { [weak self] authDataResult, error in
+            guard let strongSelf = self else {
+                print("Self is nil!")
+                return
+            }
+            guard authDataResult != nil, error == nil else {
+                strongSelf.showErrorAlert(with: "Facebook login error!", and: "Error logging in using facebook. Multi-factor authentication may be needed.")
+                return
+            }
+            print("Facebook login with Firebase success! ")
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    // What facebook does behind the scenes is that if it detects that a fb user is signed in, the login button gets updated to be a logout button. In our case, it is not applicable since we are not showing the LoginViewController of FB.
+    func loginButtonDidLogOut(_ loginButton: FBLoginButton) {}
     
 }
