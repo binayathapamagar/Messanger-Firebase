@@ -186,6 +186,61 @@ class LoginViewController: UIViewController {
         passwordTextField.resignFirstResponder()
     }
     
+    // MARK: - Facebook authentication
+    private func getFBUserDetails(with accessToken: String) {
+        let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me", parameters: ["fields": "email, name"], tokenString: accessToken, version: .none, httpMethod: .get)
+        facebookRequest.start { [weak self] connection, result, error in
+            guard let strongSelf = self else {
+                return
+            }
+            guard let fbUserDetailsResult = result as? [String: Any], error == nil else {
+                strongSelf.showErrorAlert(with: "Facebook Error!", and: "Error getting the fb user details with the graph request: \(error!)")
+                return
+            }
+            guard let userName = fbUserDetailsResult["name"] as? String, let email = fbUserDetailsResult["email"] as? String else {
+                strongSelf.showErrorAlert(with: "Casting error!", and: "Error casting the fb user's name and email from Any to a String.")
+                return
+            }
+            let nameComponents = userName.components(separatedBy: " ")
+            guard nameComponents.count == 3 else {
+                strongSelf.showErrorAlert(with: "Seperating name error!", and: "Error getting the first and last name from the full name!")
+                return
+            }
+            let firstName = nameComponents[0]
+            let lastName = nameComponents[1] + " " + nameComponents[2]
+            strongSelf.validateFBUserInFirebaseDatabase(with: email, firstName: firstName, lastName: lastName, and: accessToken)
+        }
+    }
+    
+    private func validateFBUserInFirebaseDatabase(with email: String, firstName: String, lastName: String, and accessToken: String) {
+        DatabaseManager.shared.isEmailUnique(with: email) { emailExists in
+            if !emailExists {
+                //Creating a new user in the database with the FB user details if the fb user's email does not exist in the db.
+                DatabaseManager.shared.createUser(with: ChatAppUser(firstName: firstName, lastName: lastName, email: email))
+            }
+        }
+        signFBUserInWithFirebase(with: accessToken)
+    }
+    
+    private func signFBUserInWithFirebase(with accessToken: String) {
+        //We need to trade this facebook login access token with Firebase to get a Firebase auth credential. Then, we need to use this auth credential to sign the user in Firebase. Note: We also have to handle the Multi-Factor authentication (MFA) as the fb user can have the MFA setup for their account. For example: Code texts, email, call, etc. If this is not handled, Firebase will not be able to log the user in via the auth credential as there is a second layer of security.
+        let authCredential = FacebookAuthProvider.credential(withAccessToken: accessToken)
+        FirebaseAuth.Auth.auth().signIn(with: authCredential) { [weak self] authDataResult, error in
+            guard let strongSelf = self else {
+                print("Self is nil!")
+                return
+            }
+            guard authDataResult != nil, error == nil else {
+                if let error = error {
+                    strongSelf.showErrorAlert(with: "Firebase Facebook login error!", and: "Error logging in using facebook. Multi-factor authentication may be needed: \(error)")
+                }
+                return
+            }
+            print("Facebook login with Firebase success! ")
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+        }
+    }
+    
 }
 
 // MARK: - UITextFieldDelegate extension
@@ -211,20 +266,8 @@ extension LoginViewController: LoginButtonDelegate {
             showErrorAlert(with: "Facebook login error!", and: "Access token is nil.")
             return
         }
-        //We need to trade this facebook login access token with Firebase to get a Firebase auth credential. Then, we need to use this auth credential to sign the user in Firebase. Note: We also have to handle the Multi-Factor authentication (MFA) as the fb user can have the MFA setup for their account. For example: Code texts, email, call, etc. If this is not handled, Firebase will not be able to log the user in via the auth credential as there is a second layer of security.
-        let authCredential = FacebookAuthProvider.credential(withAccessToken: accessToken)
-        FirebaseAuth.Auth.auth().signIn(with: authCredential) { [weak self] authDataResult, error in
-            guard let strongSelf = self else {
-                print("Self is nil!")
-                return
-            }
-            guard authDataResult != nil, error == nil else {
-                strongSelf.showErrorAlert(with: "Facebook login error!", and: "Error logging in using facebook. Multi-factor authentication may be needed.")
-                return
-            }
-            print("Facebook login with Firebase success! ")
-            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
-        }
+        print("Facebook login success!")
+        getFBUserDetails(with: accessToken)
     }
     
     // What facebook does behind the scenes is that if it detects that a fb user is signed in, the login button gets updated to be a logout button. In our case, it is not applicable since we are not showing the LoginViewController of FB.
