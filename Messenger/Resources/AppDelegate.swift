@@ -9,6 +9,8 @@
 import FBSDKCoreKit
 import UIKit
 import FirebaseCore
+import GoogleSignIn
+import FirebaseAuth
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             application,
             didFinishLaunchingWithOptions: launchOptions
         )
+        GIDSignIn.sharedInstance().clientID = FirebaseApp.app()?.options.clientID
+        GIDSignIn.sharedInstance().delegate = self
         return true
     }
     
@@ -29,7 +33,57 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
             annotation: options[UIApplication.OpenURLOptionsKey.annotation]
         )
+        return GIDSignIn.sharedInstance().handle(url)
     }
+    
+    private func signGoogleUserInFirebase(with user: GIDGoogleUser) {
+        guard let firstName = user.profile.givenName, let lastName = user.profile.familyName, let email = user.profile.email else {
+            print("User's profile details are nil")
+            return
+        }
+        DatabaseManager.shared.isEmailUnique(with: user.profile.email) { userEmailExists in
+            if !userEmailExists {
+                DatabaseManager.shared.createUser(with: ChatAppUser(firstName: firstName, lastName: lastName, email: email))
+            }
+        }
+        guard let authentication = user.authentication else {
+            print("Google user authenticaiton is nil!")
+            return
+        }
+        let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken, accessToken: authentication.accessToken)
+        FirebaseAuth.Auth.auth().signIn(with: credential) { authDataResult, error in
+            guard authDataResult != nil, error == nil else {
+                if let error = error {
+                    print("Error signing in using Google. Multi-factor authentication may be needed: \(error)")
+                }
+                return
+            }
+            print("Google Sign-In with Firebase success! ")
+            NotificationCenter.default.post(name: .didCompleteGoogleSignIn, object: nil)
+        }
+    }
+    
 }
 
+// MARK: - GIDSignInDelegate extension
+extension AppDelegate: GIDSignInDelegate {
+    
+    func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error!) {
+        guard error == nil else {
+            print("Error signing in with google account: \(error!)")
+            return
+        }
+        guard let user = user, let userProfile = user.profile else {
+            print("User variable and it's profile property nil!")
+            return
+        }
+        print("Successfully signed in with google user: \(userProfile)")
+        signGoogleUserInFirebase(with: user)
+    }
+    
+    func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!, withError error: Error!) {
+        print("Google user was disconnected.")
+    }
+    
+}
 

@@ -9,6 +9,7 @@ import UIKit
 import FirebaseAuth
 //import FacebookLogin - This is what they tell us to import in the documentation(Not updated) but it is wrong as we have to import FBSDKLoginKit for xcworkspace projects.
 import FBSDKLoginKit
+import GoogleSignIn
 
 class LoginViewController: UIViewController {
 
@@ -81,6 +82,10 @@ class LoginViewController: UIViewController {
         return facebookLoginButton
     }()
     
+    //Creating this observation property and assigning it as a observation to get rid of it when this ViewController deinitializes.
+    private var googleSignInObserver: NSObjectProtocol?
+    private let googleSignInButton = GIDSignInButton()
+    
     // MARK: - @IBOutlets
     
     // MARK: - Lifecycle methods
@@ -98,6 +103,12 @@ class LoginViewController: UIViewController {
         super.viewDidLayoutSubviews()
         setupSubviewsLayout()
     }
+    
+    deinit {
+        if let googleSignInObserver = googleSignInObserver {
+            NotificationCenter.default.removeObserver(googleSignInObserver)
+        }
+    }
 
     // MARK: - Methods
     private func setup() {
@@ -106,7 +117,8 @@ class LoginViewController: UIViewController {
         setupTextFields()
         setupLoginButton()
         setupFacebookLoginButton()
-    }
+        setupGoogleSignIn()
+     }
     
     private func setupNavBar() {
         navigationController?.navigationBar.tintColor = .systemBlue
@@ -128,6 +140,7 @@ class LoginViewController: UIViewController {
         scrollView.addSubview(passwordTextField)
         scrollView.addSubview(loginButton)
         scrollView.addSubview(facebookLoginButton)
+        scrollView.addSubview(googleSignInButton)
     }
     
     private func setupSubviewsLayout() {
@@ -138,6 +151,7 @@ class LoginViewController: UIViewController {
         passwordTextField.frame = CGRect(x: 30, y: emailTextField.bottom + 15 , width: scrollView.width - 60, height: 52)
         loginButton.frame = CGRect(x: 30, y: passwordTextField.bottom + 20, width: scrollView.width - 60, height: 50)
         facebookLoginButton.frame = CGRect(x: 30, y: loginButton.bottom + 20, width: scrollView.width - 60, height: 50)
+        googleSignInButton.frame = CGRect(x: 30, y: facebookLoginButton.bottom + 20, width: scrollView.width - 60, height: 50)
     }
     
     private func setupTextFields() {
@@ -239,6 +253,18 @@ class LoginViewController: UIViewController {
             print("Facebook login with Firebase success! ")
             strongSelf.navigationController?.dismiss(animated: true, completion: nil)
         }
+    }
+    
+    // MARK: - Google Sign-In
+    private func setupGoogleSignIn() {
+        GIDSignIn.sharedInstance()?.presentingViewController = self
+        googleSignInObserver = NotificationCenter.default.addObserver(forName: .didCompleteGoogleSignIn, object: nil, queue: .main, using: { [weak self] _ in
+            guard let strongSelf = self else {
+                print("Self is nil!")
+                return
+            }
+            strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+        })
     }
     
 }

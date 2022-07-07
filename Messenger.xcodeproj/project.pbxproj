@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0DBD33851DDCBB102E5B8E35 /* Pods_Messenger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00B3169681EA23256A11FBA /* Pods_Messenger.framework */; };
+		600E732C28770240009A1409 /* Notification.Name+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600E732B28770240009A1409 /* Notification.Name+Extension.swift */; };
 		604EB9742860CCB000990E93 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604EB9732860CCB000990E93 /* AppDelegate.swift */; };
 		604EB9762860CCB000990E93 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604EB9752860CCB000990E93 /* SceneDelegate.swift */; };
 		604EB9782860CCB000990E93 /* ConversationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604EB9772860CCB000990E93 /* ConversationsViewController.swift */; };
@@ -30,6 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		600E732B28770240009A1409 /* Notification.Name+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification.Name+Extension.swift"; sourceTree = "<group>"; };
 		604EB9702860CCB000990E93 /* Messenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Messenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		604EB9732860CCB000990E93 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		604EB9752860CCB000990E93 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				606D34832861D70D007AD3DD /* UIViewController+Extension.swift */,
 				606D34852861D7B6007AD3DD /* String+Extension.swift */,
 				60B6345C28730D9F0088B6BB /* UIAlertController+Extension.swift */,
+				600E732B28770240009A1409 /* Notification.Name+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -206,6 +209,7 @@
 				604EB96D2860CCB000990E93 /* Frameworks */,
 				604EB96E2860CCB000990E93 /* Resources */,
 				B80BB4408D6280E8FC7E2B5F /* [CP] Embed Pods Frameworks */,
+				C41AD1CAB52FD123C3B12C31 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -303,6 +307,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Messenger/Pods-Messenger-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		C41AD1CAB52FD123C3B12C31 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Messenger/Pods-Messenger-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Messenger/Pods-Messenger-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Messenger/Pods-Messenger-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -324,6 +345,7 @@
 				60B6345D28730D9F0088B6BB /* UIAlertController+Extension.swift in Sources */,
 				604EB9982860D0F000990E93 /* ProfileViewController.swift in Sources */,
 				604EB9762860CCB000990E93 /* SceneDelegate.swift in Sources */,
+				600E732C28770240009A1409 /* Notification.Name+Extension.swift in Sources */,
 				604EB9922860D08000990E93 /* PhotoViewerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -477,12 +499,14 @@
 				DEVELOPMENT_TEAM = 3H56HFHX43;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Messenger/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Messanger needs permission to access the camera.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Messanger needs permission to access the photos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -508,12 +532,14 @@
 				DEVELOPMENT_TEAM = 3H56HFHX43;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Messenger/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Messanger needs permission to access the camera.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Messanger needs permission to access the photos.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
